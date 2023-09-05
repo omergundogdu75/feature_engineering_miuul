@@ -423,7 +423,9 @@ missing_values_table(df, True)
 missing_values_table(df)
 
 ###################
-# Çözüm 1: Hızlıca silmek
+# Çözüm 1: Hızlıca silmek :  Eğer ağaca daylı yöntemler kullanılıyorsa, aykırı değerler gibi
+# etkisi göz ardı edilebilir.
+# bir istinası var bağımlı değişken ise sonuca varmak uzun sürebilir.
 ###################
 df.dropna().shape
 
@@ -474,8 +476,15 @@ df.isnull().sum()
 
 df = load()
 
-cat_cols, num_cols, cat_but_car = grab_col_names(df)
+cat_cols, num_cols, cat_but_car = grab_col_names(df) # kategorin, numerik ve cardinal değişkenleri yakaladık
 num_cols = [col for col in num_cols if col not in "PassengerId"]
+#
+#cat cols ve num cols u bir dönüştürne işlemi yamak gerekiyor.
+#wanhap ve label enkoder işlemi yapmamız gerek
+#kategorik verileri sayısal verilere dönüştürmek ve bu verileri makine öğrenimi algoritmalarına veya
+# istatistiksel analizlere sokmak için sıklıkla kullanılır.
+#Özellikle doğrusal regresyon, karar ağaçları gibi algoritmalar kategorik verileri kabul etmezler,
+# bu nedenle bu tür verilerin dönüştürülmesi gerekebilir.
 dff = pd.get_dummies(df[cat_cols + num_cols], drop_first=True)
 
 dff.head()
@@ -486,9 +495,11 @@ dff = pd.DataFrame(scaler.fit_transform(dff), columns=dff.columns)
 dff.head()
 
 
-# knn'in uygulanması.
+# knn'in uygulanması. #makine öğrenmesi yöntemiyle eksik değerleri doldurmayı sağlar
 from sklearn.impute import KNNImputer
-imputer = KNNImputer(n_neighbors=5)
+imputer = KNNImputer(n_neighbors=5)#
+#Burada Yaş değişkeninde eksikler olsun, bu gözlemin en yakın  5 komşusuyla ortalaması yaş değişkeni olur
+# komşularından gözlemleyerek makul değeri atar
 dff = pd.DataFrame(imputer.fit_transform(dff), columns=dff.columns)
 dff.head()
 
@@ -526,13 +537,18 @@ df["Age"].fillna(df.groupby("Sex")["Age"].transform("mean")).isnull().sum()
 # Eksik Veri Yapısının İncelenmesi
 ###################
 
-msno.bar(df)
+msno.bar(df)# ilgili veri setindeki  tam gözlem sayılarını veriri
 plt.show()
 
-msno.matrix(df)
+msno.matrix(df) # değişkenlerdeki eksikleri bir arada meydana geliyorsa
+# diğer değişşkendede eksiklik olur
+
 plt.show()
 
-msno.heatmap(df)
+msno.heatmap(df) # ısı haritası, nullity qualition, eksik değerlerin belirli bir korelasyonla mı oluşuyor,
+# eksikliklerin birlikte mi oluşuyor
+# pozitif kuvettliye yakın ise eksiklikler birarada olduğu düşünülür
+# negatif kuvvetliye yakınsa  birinde varsa diğerinde yok diye ters ilişki vardır
 plt.show()
 
 ###################
@@ -625,8 +641,8 @@ for col in binary_cols:
 
 df = load()
 df["Embarked"].value_counts()
-df["Embarked"].nunique()
-len(df["Embarked"].unique())
+df["Embarked"].nunique() # eksik değer göz önünde bulundurulmaz
+len(df["Embarked"].unique()) # eksik değer göz önünde bulundurulur
 
 #############################################
 # One-Hot Encoding
